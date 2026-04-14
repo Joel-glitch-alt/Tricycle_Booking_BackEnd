@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+import random
+from django.utils import timezone
+from datetime import timedelta
 
 
 class UserManager(BaseUserManager):
@@ -61,3 +64,22 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
+    
+
+    # Password__RESETS
+class PasswordResetOTP(models.Model):
+    user       = models.ForeignKey(User, on_delete=models.CASCADE, related_name='otps')
+    code       = models.CharField(max_length=6)
+    is_used    = models.BooleanField(default=False)  # ← prevents reuse
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_valid(self):
+        not_expired = timezone.now() < self.created_at + timedelta(minutes=10)
+        return not_expired and not self.is_used
+
+    @staticmethod
+    def generate_code():
+        return str(random.randint(100000, 999999))  # always 6 digits
+
+    def __str__(self):
+        return f"{self.user.email} - {self.code}"

@@ -1,12 +1,10 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.password_validation import validate_password
-from django.utils.http import urlsafe_base64_decode
-from django.utils.encoding import force_str
-from .models import User
+from .models import PasswordResetOTP, User
 
 
+#    SIGNUP
 class SignupSerializer(serializers.ModelSerializer):
     password  = serializers.CharField(write_only=True, min_length=8)
     password2 = serializers.CharField(write_only=True, label='Confirm Password')
@@ -46,16 +44,16 @@ class SignupSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
-
+                 # LOGIN
 class LoginSerializer(serializers.Serializer):
-    email    = serializers.EmailField()               # changed from username
+    email    = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
         email    = attrs.get('email')
         password = attrs.get('password')
 
-        user = authenticate(username=email, password=password)  # Django authenticate still uses 'username' arg
+        user = authenticate(username=email, password=password)
 
         if not user:
             raise serializers.ValidationError('Invalid email or password')
@@ -84,41 +82,75 @@ class UserSerializer(serializers.ModelSerializer):
             'created_at',
         ]
 
-#forget Password Serializer
+
+
+                 # FORGOT
 class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
     def validate_email(self, value):
-        # Use iexact to stay consistent with how your SignupSerializer checks email
         if not User.objects.filter(email__iexact=value).exists():
             raise serializers.ValidationError('No account found with this email.')
         return value
-    
 
 
-# ── Reset Password ────────────────────────────────────────────────────────────
 
+      # VERIFY OTP
+class VerifyOTPSerializer(serializers.Serializer):
+    """Step 2 — user submits the 6-digit code from their email"""
+    email = serializers.EmailField()
+    code  = serializers.CharField(max_length=6)
+
+    def validate(self, attrs):
+        try:
+            user = User.objects.get(email__iexact=attrs['email'])
+        except User.DoesNotExist:
+            raise serializers.ValidationError({'email': 'No account found with this email.'})
+
+        otp = PasswordResetOTP.objects.filter(
+            user=user, is_used=False
+        ).order_by('-created_at').first()
+
+        if not otp or otp.code != attrs['code']:
+            raise serializers.ValidationError({'code': 'Invalid OTP code.'})
+
+        if not otp.is_valid():
+            raise serializers.ValidationError({'code': 'OTP has expired. Please request a new one.'})
+
+        attrs['user'] = user
+        attrs['otp']  = otp
+        return attrs
+
+
+
+
+      # RESET PASSWORD
 class ResetPasswordSerializer(serializers.Serializer):
-    uidb64           = serializers.CharField()
-    token            = serializers.CharField()
+    """Step 3 — user submits new password"""
+    email            = serializers.EmailField()
+    code             = serializers.CharField(max_length=6)
     new_password     = serializers.CharField(write_only=True, min_length=8, validators=[validate_password])
     confirm_password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
-        # Check passwords match — same pattern as your SignupSerializer
         if attrs['new_password'] != attrs['confirm_password']:
-            raise serializers.ValidationError({'new_password': 'Passwords do not match'})
+            raise serializers.ValidationError({'new_password': 'Passwords do not match.'})
 
-        # Decode uid and validate token here so the view stays clean
         try:
-            uid  = force_str(urlsafe_base64_decode(attrs['uidb64']))
-            user = User.objects.get(pk=uid)
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            raise serializers.ValidationError({'uidb64': 'Invalid reset link.'})
+            user = User.objects.get(email__iexact=attrs['email'])
+        except User.DoesNotExist:
+            raise serializers.ValidationError({'email': 'No account found with this email.'})
 
-        if not default_token_generator.check_token(user, attrs['token']):
-            raise serializers.ValidationError({'token': 'Reset link is invalid or has expired.'})
+        otp = PasswordResetOTP.objects.filter(
+            user=user, is_used=False
+        ).order_by('-created_at').first()
 
-        # Attach user so the view can call user.set_password() without re-fetching
+        if not otp or otp.code != attrs['code']:
+            raise serializers.ValidationError({'code': 'Invalid or expired OTP.'})
+
+        if not otp.is_valid():
+            raise serializers.ValidationError({'code': 'OTP has expired. Please request a new one.'})
+
         attrs['user'] = user
+        attrs['otp']  = otp
         return attrs

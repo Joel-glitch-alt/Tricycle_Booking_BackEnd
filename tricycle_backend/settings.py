@@ -117,10 +117,22 @@ SIMPLE_JWT = {
 
 
 # ── Email ─────────────────────────────────────────────────────
-EMAIL_BACKEND      = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'noreply@tricycle.com'
+#EMAIL_BACKEND      = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# DEFAULT_FROM_EMAIL = 'noreply@tricycle.com'
+
 FRONTEND_URL       = 'http://localhost:3000'
 
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+print("EMAIL USER:", os.getenv('EMAIL_HOST_USER'))
+print("EMAIL PASS:", os.getenv('EMAIL_HOST_PASSWORD'))
 
 
 # from pathlib import Path
