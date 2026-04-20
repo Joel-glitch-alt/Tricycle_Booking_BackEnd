@@ -11,7 +11,7 @@ urlpatterns = [
     path('admin/',  admin.site.urls),
     path('',        root),
     path('auth/',   include('authentication.urls', namespace='authentication')),
-    path('api/', include('drivers.urls')),
+    path('api/drivers/', include('drivers.urls', namespace='drivers')),
     # path('drivers/', include('drivers.urls', namespace='drivers')),
     # path('rides/', include('rides.urls', namespace='rides')),
     # path('notifications/', include('notifications.urls', namespace='notifications')),
