@@ -24,3 +24,19 @@ class UserBookingsView(APIView):
         ).order_by('-created_at')
         serializer = BookingSerializer(bookings, many=True)
         return Response(serializer.data)
+    
+    #DESTINATIONS
+class RecentDestinationsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Get last 5 unique destinations for this user
+        destinations = (
+            Booking.objects
+            .filter(user=request.user, destination__isnull=False)
+            .exclude(destination='')
+            .values_list('destination', flat=True)
+            .order_by('-created_at')
+            .distinct()[:5]
+        )
+        return Response(list(destinations))

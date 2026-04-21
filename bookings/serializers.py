@@ -14,6 +14,7 @@ class BookingSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'driver', 'driver_name',
             'driver_vehicle', 'passengers',
+            'pickup_location', 'destination', # ✅ added
             'status', 'created_at'
         ]
         read_only_fields = ['id', 'status', 'created_at']
