@@ -33,7 +33,8 @@ INSTALLED_APPS = [
     'drivers',
     'notifications',
     'rides',
-    'bookings'
+    'bookings',
+    'payments',
 ]
 
 MIDDLEWARE = [
@@ -135,4 +136,6 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 print("EMAIL USER:", os.getenv('EMAIL_HOST_USER'))
 print("EMAIL PASS:", os.getenv('EMAIL_HOST_PASSWORD'))
 
-
+# Pay Stack payment gateway
+PAYSTACK_SECRET_KEY = os.getenv('PAYSTACK_SECRET_KEY')
+PAYSTACK_PUBLIC_KEY = os.getenv('PAYSTACK_PUBLIC_KEY')

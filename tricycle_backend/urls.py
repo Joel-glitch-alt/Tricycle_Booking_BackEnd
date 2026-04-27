@@ -16,4 +16,7 @@ urlpatterns = [
     # path('rides/', include('rides.urls', namespace='rides')),
     # path('notifications/', include('notifications.urls', namespace='notifications')),
     path('api/bookings/', include('bookings.urls', namespace='bookings')),
+
+    # Payments
+    path('api/payments/', include('payments.urls')),
 ]
