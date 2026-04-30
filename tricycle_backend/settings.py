@@ -15,8 +15,8 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-# ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
-ALLOWED_HOSTS = ['*'] 
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+#ALLOWED_HOSTS = ['*'] 
 
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -42,6 +42,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -70,17 +71,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tricycle_backend.wsgi.application'
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         # 'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.getenv('DB_NAME'),
+#         'USER': os.getenv('DB_USER'),
+#         # 'NAME': BASE_DIR / 'db.sqlite3',
+#         'PASSWORD': os.getenv('DB_PASSWORD'),
+#         'HOST': os.getenv('DB_HOST', 'localhost'),
+#         'PORT': os.getenv('DB_PORT', '5432'),
+#     }
+# }
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        # 'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        # 'NAME': BASE_DIR / 'db.sqlite3',
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '5432'),
-    }
+    'default': dj_database_url.config(
+        default=os.getenv('DATABASE_URL'),
+        conn_max_age=600,
+    )
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -135,8 +142,8 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-print("EMAIL USER:", os.getenv('EMAIL_HOST_USER'))
-print("EMAIL PASS:", os.getenv('EMAIL_HOST_PASSWORD'))
+# print("EMAIL USER:", os.getenv('EMAIL_HOST_USER'))
+# print("EMAIL PASS:", os.getenv('EMAIL_HOST_PASSWORD'))
 
 # Pay Stack payment gateway
 PAYSTACK_SECRET_KEY = os.getenv('PAYSTACK_SECRET_KEY')

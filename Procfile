@@ -1,0 +1,1 @@
+web: gunicorn tricycle_backend.wsgi:application
