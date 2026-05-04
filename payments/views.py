@@ -55,7 +55,8 @@ class InitializePaymentView(APIView):
             'email': request.user.email,
             'amount': amount_in_pesewas,
             'reference': f'booking_{booking.id}_{request.user.id}',
-            'callback_url': 'https://yourdomain.com/api/payments/callback/',
+            'callback_url':  'https://tricycle-booking-backend.onrender.com/api/payments/webhook/',     
+            # 'https://yourdomain.com/api/payments/callback/',
             'metadata': {
                 'booking_id': booking.id,
                 'user_id': request.user.id,
