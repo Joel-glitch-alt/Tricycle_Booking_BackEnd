@@ -19,12 +19,29 @@ class InitializePaymentView(APIView):
 
     def post(self, request):
         booking_id = request.data.get('booking_id')
-        amount = request.data.get('amount')  # in Ghana Cedis
+        amount = request.data.get('amount')
+
+        # ADD THESE DEBUG LINES
+        print(f"=== PAYMENT DEBUG ===")
+        print(f"booking_id: {booking_id}")
+        print(f"amount: {amount}")
+        print(f"user: {request.user}")
+        print(f"user_id: {request.user.id}")
+        print(f"request data: {request.data}")
+        print(f"====================")
 
         try:
             booking = Booking.objects.get(id=booking_id, user=request.user)
         except Booking.DoesNotExist:
+            print("BOOKING NOT FOUND!")  # ADD THIS
             return Response({'error': 'Booking not found'}, status=404)
+        
+         
+
+        # try:
+        #     booking = Booking.objects.get(id=booking_id, user=request.user)
+        # except Booking.DoesNotExist:
+        #     return Response({'error': 'Booking not found'}, status=404)
 
         # Paystack expects amount in pesewas (1 GHS = 100 pesewas)
         amount_in_pesewas = int(float(amount) * 100)

@@ -26,3 +26,15 @@
 #             return Response(serializer.data)
 #         except Driver.DoesNotExist:
 #             return Response({'error': 'Driver not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+# def post(self, request):
+#     booking_id = request.data.get('booking_id')
+#     amount = request.data.get('amount')
+    
+#     # Add these debug lines
+#     print(f"booking_id: {booking_id}")
+#     print(f"amount: {amount}")
+#     print(f"user: {request.user}")
+#     print(f"user_id: {request.user.id}")
