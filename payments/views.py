@@ -75,7 +75,6 @@ class InitializePaymentView(APIView):
 
         except Exception as e:
             return Response({'error': str(e)}, status=400)
-
     # def post(self, request):
     #     booking_id = request.data.get('booking_id')           
     #     amount = request.data.get('amount')
